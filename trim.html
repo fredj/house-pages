@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link rel="preload" href="trim/slab.json" as="fetch" crossorigin>
+  <link rel="preload" href="house/neighbours.json" as="fetch" crossorigin>
+  <title>tailler les platanes</title>
+  <meta name="description" content="Un petit jeu : tailler les platanes avant la fermeture de la déchetterie.">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <style>:root{--cream:#fff7e6;--ink:#3b2a1a;--green:#6cbf3c;--green-dark:#3f7f1f;--orange:#e08a3c;--yellow:#ffd24a;--panel:3px solid var(--ink);--drop:0 4px 0 var(--ink)}body{font-family:Fredoka,system-ui,sans-serif}#ui-game{pointer-events:none;-webkit-user-select:none;user-select:none;color:var(--ink);position:absolute;inset:0}.panel{background:var(--cream);border:var(--panel);box-shadow:var(--drop);border-radius:16px}#hud{top:calc(10px + env(safe-area-inset-top));align-items:flex-start;gap:8px;display:flex;position:absolute;left:10px;right:10px}#day{border-radius:30px;align-items:center;gap:4px;padding:4px 10px 4px 4px;display:flex}#day svg{width:44px;height:44px}#day .track{fill:none;stroke:#e9dcc0;stroke-width:6px}#day .arc{fill:none;stroke:var(--yellow);stroke-width:6px;stroke-linecap:round;transform-origin:24px 24px;transition:stroke .5s;transform:rotate(-90deg)}#day.late .arc{stroke:var(--orange)}#day .sun{fill:var(--yellow);stroke:var(--ink);stroke-width:2px}#day.late .sun{fill:var(--orange)}#clock{font-variant-numeric:tabular-nums;font-size:22px;font-weight:600}#counters{gap:4px;margin-left:auto;display:flex}#forecast{font-variant-numeric:tabular-nums;border-radius:16px;align-items:center;gap:4px;padding:2px 9px 2px 4px;font-size:15px;font-weight:600;display:flex;position:absolute;top:64px;left:4px}#forecast svg,.goal svg.weather{width:26px;height:26px}#forecast[hidden],#forecast>[hidden],.goal>[hidden]{display:none}.chip{border-radius:14px;flex-direction:column;align-items:center;width:42px;padding:4px 4px 6px;display:flex;position:relative}.chip img{object-fit:contain;max-width:40px;height:30px}.chip b{margin-top:2px;font-size:15px;line-height:1}.bar{border:2px solid var(--ink);background:#e9dcc0;border-radius:6px;width:34px;height:8px;margin-top:4px;overflow:hidden}.bar i{background:var(--green);width:0;height:100%;transition:width .3s;display:block}.bar.full i,.bar.low i{background:var(--orange)}.chip .tag{border:2px solid var(--ink);background:var(--orange);color:#fff;border-radius:10px;padding:1px 6px;font-size:11px;font-weight:600;position:absolute;top:-8px;right:-6px}.chip .tag[hidden]{display:none}.bump{animation:.35s ease-out bump}@keyframes bump{30%{transform:scale(1.18)translateY(-3px)}}#bubble{left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));align-items:center;gap:10px;min-height:58px;padding:6px 14px 6px 74px;font-size:17px;font-weight:600;display:flex;position:absolute}#bubble img{filter:drop-shadow(0 2px #3b2a1a55);height:76px;position:absolute;bottom:4px;left:14px}#bubble svg{flex:none;width:26px;height:26px;animation:.8s ease-in-out infinite alternate point}#bubble.oops{background:#ffe1d6}#bubble{transition:transform .35s,opacity .35s}#bubble.away{opacity:0;pointer-events:none;transform:translateY(calc(100% + 20px))}#debug{top:calc(118px + env(safe-area-inset-top));z-index:5;gap:4px;display:flex;position:absolute;left:10px}#debug button{border:2px solid var(--ink);background:var(--cream);color:var(--ink);border-radius:8px;padding:4px 7px;font:600 12px Fredoka,sans-serif}@keyframes point{to{transform:translate(3px)rotate(-8deg)}}.float{color:#fff;-webkit-text-stroke:1.5px var(--ink);paint-order:stroke;font-size:22px;font-weight:700;animation:1.1s ease-out forwards float;position:absolute;transform:translate(-50%,-50%)}@keyframes float{0%{opacity:1}to{opacity:0;transform:translate(-50%,-160%)scale(1.2)}}#fx,#weather{pointer-events:none;width:100%;height:100%;position:absolute;inset:0}#fx .reach{fill:#fff2;stroke:#fff;stroke-width:2.5px;stroke-dasharray:6 5}#fx .trail{fill:none;stroke:#fff;stroke-width:6px;stroke-linecap:round;stroke-linejoin:round}#fx .twig{stroke:#8a6a3a;stroke-width:2px;stroke-linecap:round}#fx .leaf{fill:#5d8a3a}#fx .pointer path{fill:var(--yellow);stroke:var(--ink);stroke-width:2px;animation:.9s ease-in-out infinite alternate nudge}@keyframes nudge{0%{transform:translate(-4px)}to{transform:translate(4px)}}#fx .drop{fill:var(--ink)}#fx .spring{fill:#ffe36a33;stroke:var(--yellow);stroke-width:3px}#fx .sweat{fill:#9fd4ff;stroke:var(--ink);stroke-width:1.5px}#fx .ring{fill:var(--cream);stroke:var(--ink);stroke-width:3px}#fx .filled{fill:none;stroke:var(--green);stroke-width:4px;stroke-linecap:round}.screen{padding:16px 12px calc(20px + env(safe-area-inset-bottom));pointer-events:auto;background:linear-gradient(#0000 30%,#0006);place-items:end center;display:grid;position:absolute;inset:0}.screen[hidden]{display:none}.card{box-sizing:border-box;text-align:center;width:min(360px,100%);padding:18px 16px 16px}.card h1{color:var(--green-dark);-webkit-text-stroke:1px var(--ink);paint-order:stroke;margin:0;font-size:34px;font-weight:700;line-height:1.05}.card{position:relative}.hero{filter:drop-shadow(0 3px #3b2a1a55);height:120px;position:absolute;top:-70px;right:18px;transform:rotate(6deg)}.card h2{margin:0;font-size:30px;font-weight:700}.goal{margin:8px 0 12px;font-size:17px}.goal svg{vertical-align:-3px;width:20px;height:20px}.steps{justify-content:center;gap:8px;margin-bottom:14px;display:flex}.step{border:2px solid var(--ink);background:#fff;border-radius:12px;flex:1;padding:8px 4px 6px;font-size:14px;font-weight:600;position:relative}.step .pics{justify-content:center;align-items:center;gap:2px;height:56px;display:flex}.step img{max-width:64px;max-height:52px}.step .n{border:2px solid var(--ink);background:var(--yellow);border-radius:50%;width:22px;height:22px;font-size:13px;line-height:22px;position:absolute;top:-10px;left:-8px}.step .swipe{width:60px;height:20px;position:absolute}.step .swipe path{fill:none;stroke:#fff;stroke-width:5px;stroke-linecap:round;filter:drop-shadow(0 1px 0 var(--ink))}.play{border:var(--panel);width:100%;box-shadow:var(--drop);background:var(--green);color:#fff;letter-spacing:1px;-webkit-text-stroke:1px var(--ink);paint-order:stroke;cursor:pointer;border-radius:16px;padding:12px;font:700 24px Fredoka,system-ui,sans-serif;display:block}.play:active{box-shadow:0 1px 0 var(--ink);transform:translateY(3px)}.ghost{background:var(--cream);color:var(--ink);-webkit-text-stroke:0;margin-top:10px;font-size:18px}.small{opacity:.7;margin:10px 0 0;font-size:13px}#stars{margin:8px 0 4px}#stars svg{width:54px;height:54px;margin:0 2px}#stars path{fill:#e9dcc0;stroke:var(--ink);stroke-width:3px;stroke-linejoin:round}#stars .won path{fill:var(--yellow)}#stars svg:nth-child(2){transform:translateY(-10px)scale(1.15)}#end-text{margin:4px 0;font-size:16px}#best{opacity:.75;margin:0 0 12px;font-size:14px}</style>
+  <script type="module" crossorigin src="./assets/trim-SrtMc3BQ.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/cesium-DOFHxepH.js">
+  <link rel="modulepreload" crossorigin href="./assets/toy-view-6q5uA03a.js">
+  <link rel="stylesheet" crossorigin href="./assets/cesium-ZYnpHEFn.css">
+  <link rel="stylesheet" crossorigin href="./assets/toy-view-2s4fuWNT.css">
+  <link rel="stylesheet" crossorigin href="./assets/trim-Br4KrGv1.css">
+  <link rel="stylesheet" crossorigin href="./assets/latin-600-Cv5fXBpv.css">
+</head>
+
+<body>
+  <main id="cesiumContainer" class="loading"></main>
+  <div id="ui-game">
+    <div id="hud">
+      <div id="day" class="panel">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+          <circle class="track" cx="24" cy="24" r="19"/>
+          <circle class="arc" id="day-arc" cx="24" cy="24" r="19" pathLength="100" stroke-dasharray="100 100"/>
+          <circle class="sun" cx="24" cy="24" r="8"/>
+        </svg>
+        <span id="clock">8:00</span>
+      </div>
+      <div id="forecast" class="panel" hidden><span class="storm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 15.5h10a3.8 3.8 0 0 0 0-7.6 5 5 0 0 0-9.4-1.2A3.5 3.5 0 0 0 6.5 15.5z" fill="#dfe3ea" stroke="#3b2a1a" stroke-width="1.6" stroke-linejoin="round"/><path d="M12.5 13l-3 4.5h2.4l-1.2 4.5 4.6-6h-2.5l1.7-3z" fill="#ffd24a" stroke="#3b2a1a" stroke-width="1.2" stroke-linejoin="round"/></svg></span><span class="fine"><svg viewBox="0 0 24 24" aria-hidden="true"><g stroke="#3b2a1a" stroke-width="1.6" stroke-linecap="round"><path d="M12 2.5v2.5M12 19v2.5M2.5 12h2.5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></g><circle cx="12" cy="12" r="4.6" fill="#ffd24a" stroke="#3b2a1a" stroke-width="1.6"/></svg></span><span id="forecast-time"></span></div>
+      <div id="counters">
+        <div class="chip panel" id="chip-trees"><img src="trim/tree.png" alt="arbres"><b id="trees">0/3</b></div>
+        <div class="chip panel" id="chip-energy"><img src="trim/gardener.png" alt="énergie"><div class="bar" id="energy"><i></i></div></div>
+        <div class="chip panel" id="chip-arms"><img src="trim/branches.png" alt="bras"><div class="bar" id="arms"><i></i></div></div>
+        <div class="chip panel" id="chip-trailer"><img src="trim/trailer.png" alt="remorque"><div class="bar" id="trailer"><i></i></div>
+          <span class="tag" id="away" hidden>en route</span></div>
+      </div>
+    </div>
+    <div id="bubble" class="panel" hidden>
+      <img src="trim/gardener.png" alt="">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11V4.5a1.5 1.5 0 0 1 3 0V10h.5V8.5a1.5 1.5 0 0 1 3 0V10h.5V9.5a1.5 1.5 0 0 1 3 0v5.5a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L4.3 14a1.6 1.6 0 0 1 2.6-1.8L9 14z" fill="#fff" stroke="#3b2a1a" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <span id="hint"></span>
+    </div>
+    <div id="floats"></div>
+  </div>
+  <div id="start" class="screen" hidden>
+    <div class="card panel">
+      <img class="hero" src="trim/gardener.png" alt="">
+      <h1>Platanes<br>simulator</h1>
+      <p class="goal"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6" fill="#ffd24a" stroke="#3b2a1a" stroke-width="2"/></svg>
+        Trois arbres, à la déchetterie avant <b id="closing"></b></p>
+      <p class="goal" id="weather-line"><span class="storm"><svg class="weather" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 15.5h10a3.8 3.8 0 0 0 0-7.6 5 5 0 0 0-9.4-1.2A3.5 3.5 0 0 0 6.5 15.5z" fill="#dfe3ea" stroke="#3b2a1a" stroke-width="1.6" stroke-linejoin="round"/><path d="M12.5 13l-3 4.5h2.4l-1.2 4.5 4.6-6h-2.5l1.7-3z" fill="#ffd24a" stroke="#3b2a1a" stroke-width="1.2" stroke-linejoin="round"/></svg></span><span class="fine"><svg class="weather" viewBox="0 0 24 24" aria-hidden="true"><g stroke="#3b2a1a" stroke-width="1.6" stroke-linecap="round"><path d="M12 2.5v2.5M12 19v2.5M2.5 12h2.5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></g><circle cx="12" cy="12" r="4.6" fill="#ffd24a" stroke="#3b2a1a" stroke-width="1.6"/></svg></span>
+        <span id="weather-text"></span></p>
+      <div class="steps">
+        <div class="step"><span class="n">1</span><div class="pics"><img src="trim/ball.png" alt=""></div>Touche une boule</div>
+        <div class="step"><span class="n">2</span><div class="pics"><img src="trim/ball.png" alt="">
+          <svg class="swipe" viewBox="0 0 60 20" aria-hidden="true"><path d="M4 14 Q30 2 56 10"/></svg></div>Glisse dessus</div>
+        <div class="step"><span class="n">3</span><div class="pics"><img src="trim/branches.png" alt=""><img src="trim/trailer.png" alt=""></div>Emporte tout</div>
+      </div>
+      <button id="go" class="play">JOUER</button>
+      <p class="small">Ce qui brille est la prochaine étape · glisse pour te déplacer, pince pour zoomer</p>
+    </div>
+  </div>
+  <div id="end" class="screen" hidden>
+    <div class="card panel">
+      <h2 id="end-title"></h2>
+      <div id="stars"></div>
+      <p id="end-text"></p>
+      <p id="best"></p>
+      <button id="again" class="play">REJOUER</button>
+      <button id="share" class="play ghost">PARTAGER UNE IMAGE</button>
+    </div>
+  </div>
+</body>
+
+</html>
