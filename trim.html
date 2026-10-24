@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="preload" href="trim/slab.json" as="fetch" crossorigin>
+  <link rel="preload" href="house/neighbours.json" as="fetch" crossorigin>
+  <title>tailler les platanes</title>
+  <meta name="description" content="Un petit jeu : tailler les platanes avant la fermeture de la déchetterie.">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <script type="module" crossorigin src="./assets/trim-DXrz_l4h.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/cesium-C7CsbgyN.js">
+  <link rel="modulepreload" crossorigin href="./assets/toy-view-DLq8qldr.js">
+  <link rel="stylesheet" crossorigin href="./assets/cesium-ZYnpHEFn.css">
+  <link rel="stylesheet" crossorigin href="./assets/toy-view-tlFDzRur.css">
+  <link rel="stylesheet" crossorigin href="./assets/trim-DXJlyCoH.css">
+  <link rel="stylesheet" crossorigin href="./assets/latin-600-Cv5fXBpv.css">
+</head>
+
+<body>
+  <main id="cesiumContainer" class="loading"></main>
+  <div id="ui-game">
+    <div id="hud">
+      <div id="day" class="panel">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+          <circle class="track" cx="24" cy="24" r="19"/>
+          <circle class="arc" id="day-arc" cx="24" cy="24" r="19" pathLength="100" stroke-dasharray="100 100"/>
+          <circle class="sun" cx="24" cy="24" r="8"/>
+        </svg>
+        <span id="clock">8:00</span>
+      </div>
+      <div id="forecast" class="panel" hidden><span class="storm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 15.5h10a3.8 3.8 0 0 0 0-7.6 5 5 0 0 0-9.4-1.2A3.5 3.5 0 0 0 6.5 15.5z" fill="#dfe3ea" stroke="#3b2a1a" stroke-width="1.6" stroke-linejoin="round"/><path d="M12.5 13l-3 4.5h2.4l-1.2 4.5 4.6-6h-2.5l1.7-3z" fill="#ffd24a" stroke="#3b2a1a" stroke-width="1.2" stroke-linejoin="round"/></svg></span><span class="fine"><svg viewBox="0 0 24 24" aria-hidden="true"><g stroke="#3b2a1a" stroke-width="1.6" stroke-linecap="round"><path d="M12 2.5v2.5M12 19v2.5M2.5 12h2.5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></g><circle cx="12" cy="12" r="4.6" fill="#ffd24a" stroke="#3b2a1a" stroke-width="1.6"/></svg></span><span id="forecast-time"></span></div>
+      <div id="counters">
+        <div class="chip panel" id="chip-trees"><img src="trim/tree.png" alt="arbres"><b id="trees">0/3</b></div>
+        <div class="chip panel" id="chip-energy"><img src="trim/gardener.png" alt="énergie"><div class="bar" id="energy"><i></i></div></div>
+        <div class="chip panel" id="chip-arms"><img src="trim/branches.png" alt="bras"><div class="bar" id="arms"><i></i></div></div>
+        <div class="chip panel" id="chip-trailer"><img src="trim/trailer.png" alt="remorque"><div class="bar" id="trailer"><i></i></div>
+          <span class="tag" id="away" hidden>en route</span></div>
+      </div>
+    </div>
+    <div id="bubble" class="panel" hidden>
+      <img src="trim/gardener.png" alt="">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11V4.5a1.5 1.5 0 0 1 3 0V10h.5V8.5a1.5 1.5 0 0 1 3 0V10h.5V9.5a1.5 1.5 0 0 1 3 0v5.5a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L4.3 14a1.6 1.6 0 0 1 2.6-1.8L9 14z" fill="#fff" stroke="#3b2a1a" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <span id="hint"></span>
+    </div>
+    <div id="floats"></div>
+  </div>
+  <div id="start" class="screen" hidden>
+    <div class="card panel">
+      <img class="hero" src="trim/gardener.png" alt="">
+      <h1>Platanes<br>simulator</h1>
+      <p class="goal"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6" fill="#ffd24a" stroke="#3b2a1a" stroke-width="2"/></svg>
+        Trois arbres, à la déchetterie avant <b id="closing"></b></p>
+      <p class="goal" id="weather-line"><span class="storm"><svg class="weather" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 15.5h10a3.8 3.8 0 0 0 0-7.6 5 5 0 0 0-9.4-1.2A3.5 3.5 0 0 0 6.5 15.5z" fill="#dfe3ea" stroke="#3b2a1a" stroke-width="1.6" stroke-linejoin="round"/><path d="M12.5 13l-3 4.5h2.4l-1.2 4.5 4.6-6h-2.5l1.7-3z" fill="#ffd24a" stroke="#3b2a1a" stroke-width="1.2" stroke-linejoin="round"/></svg></span><span class="fine"><svg class="weather" viewBox="0 0 24 24" aria-hidden="true"><g stroke="#3b2a1a" stroke-width="1.6" stroke-linecap="round"><path d="M12 2.5v2.5M12 19v2.5M2.5 12h2.5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></g><circle cx="12" cy="12" r="4.6" fill="#ffd24a" stroke="#3b2a1a" stroke-width="1.6"/></svg></span>
+        <span id="weather-text"></span></p>
+      <div class="steps">
+        <div class="step"><span class="n">1</span><div class="pics"><img src="trim/ball.png" alt=""></div>Touche une boule</div>
+        <div class="step"><span class="n">2</span><div class="pics"><img src="trim/ball.png" alt="">
+          <svg class="swipe" viewBox="0 0 60 20" aria-hidden="true"><path d="M4 14 Q30 2 56 10"/></svg></div>Glisse dessus</div>
+        <div class="step"><span class="n">3</span><div class="pics"><img src="trim/branches.png" alt=""><img src="trim/trailer.png" alt=""></div>Emporte tout</div>
+      </div>
+      <button id="go" class="play">JOUER</button>
+      <p class="small">Ce qui brille est la prochaine étape · glisse pour te déplacer, pince pour zoomer</p>
+    </div>
+  </div>
+  <div id="end" class="screen" hidden>
+    <div class="card panel">
+      <h2 id="end-title"></h2>
+      <div id="stars"></div>
+      <p id="end-text"></p>
+      <p id="best"></p>
+      <button id="again" class="play">REJOUER</button>
+    </div>
+  </div>
+</body>
+
+</html>
